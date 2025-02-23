@@ -184,10 +184,15 @@ def get_access_token(config: Config):
 
 
 async def main():
+    class StdoutFilter:
+        def __call__(self, record: logging.LogRecord) -> bool:
+            return record.levelno < logging.WARNING
+
     logging.config.dictConfig(
         {
             "version": 1,
             "disable_existing_loggers": False,
+            "filters": {"only_info_debug": {"()": StdoutFilter}},
             "formatters": {"simple": {"format": "%(levelname)-8s - %(message)s"}},
             "handlers": {
                 "stdout": {
@@ -195,10 +200,11 @@ async def main():
                     "level": "DEBUG",
                     "formatter": "simple",
                     "stream": "ext://sys.stdout",
+                    "filters": ["only_info_debug"],
                 },
                 "stderr": {
                     "class": "logging.StreamHandler",
-                    "level": "ERROR",
+                    "level": "WARNING",
                     "formatter": "simple",
                     "stream": "ext://sys.stderr",
                 },
